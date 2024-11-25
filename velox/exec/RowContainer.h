@@ -1498,6 +1498,8 @@ class RowContainer {
   // to 'typeKinds_' and 'rowColumns_'.
   std::vector<TypePtr> types_;
   std::vector<TypeKind> typeKinds_;
+  // Width of fixed size fields. std::nullopt for variable width fields.
+  std::vector<std::optional<int32_t>> fixedColumnWidth_;
   int32_t nextOffset_ = 0;
   // Indicates if this row container has rows with duplicate keys. This only
   // applies if 'nextOffset_' is set.
@@ -1510,10 +1512,12 @@ class RowContainer {
   // Offset and null indicator offset of non-aggregate fields as a single word.
   // Corresponds pairwise to 'types_'.
   std::vector<RowColumn> rowColumns_;
+
   // Optional aggregated column stats(e.g. min/max size) for non-aggregate
   // fields. Index aligns with 'rowColumns_'. Column stats will only be enabled
   // if 'collectColumnStats_' is true.
   std::vector<RowColumn::Stats> rowColumnsStats_;
+
   // Bit offset of the probed flag for a full or right outer join  payload. 0 if
   // not applicable.
   int32_t probedFlagOffset_ = 0;

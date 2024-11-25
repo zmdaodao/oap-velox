@@ -184,8 +184,14 @@ RowContainer::RowContainer(
     typeKinds_.push_back(type->kind());
     types_.push_back(type);
     offsets_.push_back(offset);
-    offset += typeKindSize(type->kind());
+    const auto typeSize = typeKindSize(type->kind());
+    offset += typeSize;
     nullOffsets_.push_back(nullOffset);
+    if (type->isFixedWidth()) {
+      fixedColumnWidth_.push_back(typeSize);
+    } else {
+      fixedColumnWidth_.push_back(std::nullopt);
+    }
     isVariableWidth |= !type->isFixedWidth();
     if (nullableKeys_) {
       ++nullOffset;
@@ -216,6 +222,11 @@ RowContainer::RowContainer(
   for (auto& type : dependentTypes) {
     types_.push_back(type);
     typeKinds_.push_back(type->kind());
+    if (type->isFixedWidth()) {
+      fixedColumnWidth_.push_back(typeKindSize(type->kind()));
+    } else {
+      fixedColumnWidth_.push_back(std::nullopt);
+    }
     nullOffsets_.push_back(nullOffset);
     ++nullOffset;
     isVariableWidth |= !type->isFixedWidth();
@@ -617,7 +628,8 @@ int32_t RowContainer::variableSizeAt(const char* row, column_index_t column)
 }
 
 int32_t RowContainer::fixedSizeAt(column_index_t column) const {
-  return typeKindSize(typeKinds_[column]);
+  VELOX_DCHECK(fixedColumnWidth_[column].has_value());
+  return fixedColumnWidth_[column].value();
 }
 
 int32_t RowContainer::extractVariableSizeAt(
@@ -707,9 +719,9 @@ void RowContainer::extractSerializedRows(
   size_t fixedWidthRowSize = 0;
   bool hasVariableWidth = false;
   for (auto i = 0; i < types_.size(); ++i) {
-    const auto& type = types_[i];
-    if (type->isFixedWidth()) {
-      fixedWidthRowSize += typeKindSize(type->kind());
+    const auto width = fixedColumnWidth_[i];
+    if (width.has_value()) {
+      fixedWidthRowSize += width.value();
     } else {
       hasVariableWidth = true;
     }
@@ -746,11 +758,11 @@ void RowContainer::extractSerializedRows(
 
     // Copy values.
     for (auto j = 0; j < types_.size(); ++j) {
-      const auto& type = types_[j];
-      if (type->isFixedWidth()) {
-        const auto size = typeKindSize(type->kind());
-        ::memcpy(rawBuffer + offset, row + rowColumns_[j].offset(), size);
-        offset += size;
+      const auto width = fixedColumnWidth_[i];
+      if (width.has_value()) {
+        ::memcpy(
+            rawBuffer + offset, row + rowColumns_[j].offset(), width.value());
+        offset += width.value();
       } else {
         auto size = extractVariableSizeAt(row, j, rawBuffer + offset);
         offset += size;
@@ -778,11 +790,13 @@ void RowContainer::storeSerializedRow(
 
   RowSizeTracker tracker(row[rowSizeOffset_], *stringAllocator_);
   for (auto i = 0; i < types_.size(); ++i) {
-    const auto& type = types_[i];
-    if (type->isFixedWidth()) {
-      const auto size = typeKindSize(type->kind());
-      ::memcpy(row + rowColumns_[i].offset(), serialized.data() + offset, size);
-      offset += size;
+    const auto width = fixedColumnWidth_[i];
+    if (width.has_value()) {
+      ::memcpy(
+          row + rowColumns_[i].offset(),
+          serialized.data() + offset,
+          width.value());
+      offset += width.value();
     } else {
       const auto size = storeVariableSizeAt(serialized.data() + offset, row, i);
       offset += size;
