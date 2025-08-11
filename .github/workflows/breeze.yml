@@ -54,7 +54,7 @@ jobs:
         working-directory: velox
     steps:
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           path: velox
 
@@ -91,7 +91,7 @@ jobs:
         working-directory: velox
     steps:
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           path: velox
 

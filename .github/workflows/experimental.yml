@@ -64,7 +64,7 @@ jobs:
           restore-keys: |
             ccache-benchmark-
       - name: "Checkout Repo"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           path: velox
           submodules: 'recursive'
@@ -129,7 +129,7 @@ jobs:
             ccache-presto-
 
       - name: "Checkout Repo"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           path: velox
           submodules: 'recursive'
@@ -181,7 +181,7 @@ jobs:
     steps:
 
       - name: "Checkout Repo"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           ref: "${{ inputs.ref || 'main' }}"
 
@@ -222,7 +222,7 @@ jobs:
     steps:
 
       - name: "Checkout Repo"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           ref: "${{ inputs.ref || 'main' }}"
 
@@ -263,7 +263,7 @@ jobs:
     steps:
 
       - name: "Checkout Repo"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           ref: "${{ inputs.ref || 'main' }}"
 
@@ -313,7 +313,7 @@ jobs:
     steps:
 
       - name: "Checkout Repo"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           ref: "${{ inputs.ref || 'main' }}"
 
