@@ -43,7 +43,7 @@ jobs:
       CUDA_VERSION: "12.8"
       USE_CLANG: "${{ inputs.use-clang && 'true' || 'false' }}"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Fix git permissions
         # Usually actions/checkout does this but as we run in a container
@@ -146,7 +146,7 @@ jobs:
         run: |
           mkdir -p '${{ env.CCACHE_DIR }}'
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           path: velox
 
