@@ -134,7 +134,7 @@ jobs:
           python setup.py sdist --dist-dir wheelhouse
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@6cccd09a31908ffd175b012fb8bf4e1dbda3bc6c # v2
+        uses: pypa/cibuildwheel@c923d83ad9c1bc00211c5041d0c3f73294ff88f6 # v2
         env:
           BUILD_VERSION: "${{ inputs.version || steps.version.outputs.build_version }}"
           CIBW_ARCHS: "native"
